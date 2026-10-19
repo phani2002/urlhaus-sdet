@@ -1,6 +1,11 @@
+import logging
 
 from fastapi import FastAPI, HTTPException, Query
 from app.database import get_connection, initialize_database
+from app.logging_config import configure_logging
+configure_logging()
+logger = logging.getLogger(__name__)
+
 
 app = FastAPI(
     title="URLhaus SDET API",
@@ -14,11 +19,13 @@ def startup_event():
 
 @app.get("/health")
 def health_check():
+    logger.info("Health check requested")
     return {"status": "healthy"}
 
 
 @app.get("/records")
 def get_records(limit: int = Query(default=10, ge=1, le=100)):
+    logger.info("Fetching records with limit=%d", limit)
     with get_connection() as connection:
         rows = connection.execute(
             """
@@ -40,6 +47,7 @@ def get_records(limit: int = Query(default=10, ge=1, le=100)):
 
 @app.get("/records/{record_id}")
 def get_record(record_id: int):
+    logger.info("Fetching record id=%d", record_id)
     with get_connection() as connection:
         row = connection.execute(
             """
