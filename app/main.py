@@ -1,20 +1,34 @@
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Query
 from app.database import get_connection, initialize_database
 from app.logging_config import configure_logging
-configure_logging()
 logger = logging.getLogger(__name__)
 
-
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    initialize_database()
+    yield
 app = FastAPI(
     title="URLhaus SDET API",
     description="API for querying stored URLhaus threat records",
     version="1.0.0",
+    lifespan=lifespan,
 )
-@app.on_event("startup")
-def startup_event():
+
+from contextlib import asynccontextmanager
+app = FastAPI(
+    title="URLhaus SDET API",
+    description="API for querying stored URLhaus threat records",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     initialize_database()
+    yield
 
 
 @app.get("/health")
