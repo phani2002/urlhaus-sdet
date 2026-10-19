@@ -2,6 +2,7 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app import database
+from app.database import DB_PATH, DATA_DIR, initialize_database
 
 client = TestClient(app)
 
@@ -65,8 +66,8 @@ def test_get_specific_record(monkeypatch, tmp_path):
 
 
 def test_record_not_found():
+    initialize_database()
     response = client.get("/records/99999999")
-
     assert response.status_code == 404
     assert response.json()["detail"] == "Record not found"
 
